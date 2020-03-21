@@ -1,6 +1,7 @@
-# Author: Vincent Dubourg <vincent.dubourg@gmail.com>
-#         Jake Vanderplas <vanderplas@astro.washington.edu>
-#         Jan Hendrik Metzen <jhm@informatik.uni-bremen.de>s
+# Original Authors: Vincent Dubourg <vincent.dubourg@gmail.com>
+#                   Jake Vanderplas <vanderplas@astro.washington.edu>
+#                   Jan Hendrik Metzen <jhm@informatik.uni-bremen.de>
+# Modified by: Tovly Deutsch
 # License: BSD 3 clause
 
 import numpy as np
@@ -8,10 +9,10 @@ from matplotlib import pyplot as plt
 import random
 
 from sklearn.gaussian_process import GaussianProcessRegressor
-from sklearn.gaussian_process.kernels import RBF, Matern, DotProduct, ConstantKernel as C
+from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 
-def f(x):
+def v(x):
   """The function to predict."""
   return 3 * abs(x)
 
@@ -26,7 +27,7 @@ def plot(axs):
   # X = np.atleast_2d([float(x) for x in np.arange(-10, 10, 2.5)]).T
 
   # Observations
-  y = f(X).ravel()
+  y = v(X).ravel()
   noise_amount = 2.0
   dy = 0.5 + noise_amount * np.random.random(y.shape)
   noise = np.random.normal(0, dy)
