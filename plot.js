@@ -123,20 +123,32 @@ function plot(data) {
 
 async function main() {
   let data1;
-  await loadJSON("graph.json").then(response => {
+  await loadJSON("graph0.json").then(response => {
     // Parse JSON string into object
     data1 = JSON.parse(response);
     plot(data1);
   });
-
-  loadJSON("graph2.json").then(response => {
-    let data2 = JSON.parse(response);
-    d3.select("#path1")
-      .attr("d", lineGen(data1))
-      .transition()
-      .duration(1000)
-      .attr("d", lineGen(data2));
-  });
+  let animationActive = true;
+  let i = 1;
+  while (animationActive) {
+    console.log("i");
+    await loadJSON(`graph${i}.json`).then(response => {
+      console.log(` plotting graph${i}.json`);
+      let currentData = JSON.parse(response);
+      d3.select("#path1")
+        .transition()
+        .duration(2000)
+        .attr("d", lineGen(currentData));
+    });
+    await new Promise(resolve => {
+      setTimeout(resolve, 2000);
+    });
+    if (i < 9) {
+      i++;
+    } else {
+      i = 0;
+    }
+  }
 }
 
 main();
