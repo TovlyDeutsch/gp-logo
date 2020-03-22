@@ -88,36 +88,6 @@ function plot(data) {
         .scale(y)
         .ticks(10);
     }
-
-    rules
-      .append("svg:g")
-      .classed("grid x_grid", true)
-      .attr("transform", "translate(0," + h + ")")
-      .call(
-        make_x_axis()
-          .tickSize(-h, 0, 0)
-          .tickFormat("")
-      );
-
-    rules
-      .append("svg:g")
-      .classed("grid y_grid", true)
-      .call(
-        make_y_axis()
-          .tickSize(-w, 0, 0)
-          .tickFormat("")
-      );
-
-    rules
-      .append("svg:g")
-      .classed("labels x_labels", true)
-      .attr("transform", "translate(0," + h + ")")
-      .call(make_x_axis().tickSize(5));
-
-    rules
-      .append("svg:g")
-      .classed("labels y_labels", true)
-      .call(make_y_axis().tickSize(10, 5, 0));
   }
 }
 
