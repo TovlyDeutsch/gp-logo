@@ -3,6 +3,7 @@ console.log("test");
 console.log(d3);
 
 const loadJSON = fileName => {
+  // TODO considering locally caching instead of fresh requests
   return new Promise(resolve => {
     let xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
@@ -32,7 +33,7 @@ var y = d3
 
 function lineGen(data) {
   return _d =>
-    d3.line()(
+    d3.line().curve(d3.curveCardinal)(
       data.map(function(pair) {
         return [x(pair[0]), y(pair[1])];
       })
@@ -111,7 +112,7 @@ async function main() {
         .attr("d", lineGen(currentData));
     });
     await new Promise(resolve => {
-      setTimeout(resolve, 2000);
+      setTimeout(resolve, 4000);
     });
     if (i < 9) {
       i++;

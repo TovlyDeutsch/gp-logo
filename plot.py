@@ -36,7 +36,7 @@ def plot(axs, filename):
 
   # Mesh the input space for evaluations of the real function, the prediction and
   # its MSE
-  x = np.atleast_2d(np.linspace(-10, 10, 1000)).T
+  x = np.atleast_2d(np.linspace(-10, 10, 100)).T
 
   # Instantiate a Gaussian Process model
   kernel = C(1e-10, (1e-3, 1e3)) * RBF(10, (1e-2, 1e2))
