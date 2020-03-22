@@ -7,6 +7,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import random
+import json
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
@@ -49,11 +50,14 @@ def plot(axs):
 
   # Make the prediction on the meshed x-axis (ask for MSE as well)
   y_pred = gp.predict(x)
+  x_list = x.tolist()
+  json.dump([[x_list[i][0], y] for (i, y) in enumerate(
+      y_pred.tolist())], open('graph.json', 'w'))
 
   # Plot the function, the prediction and the 95% confidence interval based on
   # the MSE
   # axs.figure()
-  axs.plot(x, f(x), 'r:', label=r'$f(x) = x\,\sin(x)$')
+  axs.plot(x, v(x), 'r:', label=r'$f(x) = x\,\sin(x)$')
   axs.plot(X, y, 'r.', markersize=10, label='Observations')
   axs.plot(x, y_pred, 'b-', label='Prediction')
   # axs.xlabel('$x$')
@@ -72,4 +76,4 @@ if __name__ == "__main__":
   F = plt.gcf()
   Size = F.get_size_inches()
   F.set_size_inches(Size[0] * 0.4, Size[1] * 1.3, forward=True)
-  plt.show()
+  # plt.show()
