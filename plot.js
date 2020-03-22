@@ -2,33 +2,45 @@
 console.log("test");
 console.log(d3);
 
-const loadJSON = callback => {
-  let xobj = new XMLHttpRequest();
-  xobj.overrideMimeType("application/json");
-  xobj.open("GET", "graph.json", true);
-  // Replace 'my_data' with the path to your file
-  xobj.onreadystatechange = () => {
-    if (xobj.readyState === 4 && xobj.status === 200) {
-      // Required use of an anonymous callback
-      // as .open() will NOT return a value but simply returns undefined in asynchronous mode
-      callback(xobj.responseText);
-    }
-  };
-  xobj.send(null);
+const loadJSON = fileName => {
+  return new Promise(resolve => {
+    let xobj = new XMLHttpRequest();
+    xobj.overrideMimeType("application/json");
+    xobj.open("GET", fileName, true);
+    // Replace 'my_data' with the path to your file
+    xobj.onreadystatechange = () => {
+      if (xobj.readyState === 4 && xobj.status === 200) {
+        // Required use of an anonymous callback
+        // as .open() will NOT return a value but simply returns undefined in asynchronous mode
+        resolve(xobj.responseText);
+      }
+    };
+    xobj.send(null);
+  });
 };
+
+var w = 400;
+var h = 400;
+var x = d3
+  .scaleLinear()
+  .domain([-10, 10])
+  .range([0, w]);
+var y = d3
+  .scaleLinear()
+  .domain([0, 35])
+  .range([h, 0]);
+
+function lineGen(data) {
+  return _d =>
+    d3.line()(
+      data.map(function(pair) {
+        return [x(pair[0]), y(pair[1])];
+      })
+    );
+}
 
 function plot(data) {
   console.log("plotting");
-  var w = 400;
-  var h = 400;
-  var x = d3
-    .scaleLinear()
-    .domain([-10, 10])
-    .range([0, w]);
-  var y = d3
-    .scaleLinear()
-    .domain([0, 35])
-    .range([h, 0]);
 
   var pad = 50;
   var svg = d3
@@ -55,13 +67,9 @@ function plot(data) {
   function chart_line() {
     var g = vis.append("svg:g").classed("series", true);
 
-    g.append("svg:path").attr("d", function(d) {
-      return d3.line()(
-        data.map(function(pair) {
-          return [x(pair[0]), y(pair[1])];
-        })
-      );
-    });
+    g.append("svg:path")
+      .attr("id", "path1")
+      .attr("d", lineGen(data));
   }
 
   function make_rules() {
@@ -113,8 +121,28 @@ function plot(data) {
   }
 }
 
-loadJSON(response => {
-  // Parse JSON string into object
-  let actual_JSON = JSON.parse(response);
-  plot(actual_JSON);
-});
+async function main() {
+  let data1;
+  await loadJSON("graph.json").then(response => {
+    // Parse JSON string into object
+    data1 = JSON.parse(response);
+    plot(data1);
+  });
+
+  loadJSON("graph2.json").then(response => {
+    let data2 = JSON.parse(response);
+    d3.select("#path1")
+      .attr("d", lineGen(data1))
+      .transition()
+      .duration(1000)
+      .attr("d", lineGen(data2));
+  });
+}
+
+main();
+
+// loadJSON(response => {
+//   // Parse JSON string into object
+//   let actual_JSON = JSON.parse(response);
+//   plot(actual_JSON);
+// });

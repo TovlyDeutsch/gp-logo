@@ -52,7 +52,7 @@ def plot(axs):
   y_pred = gp.predict(x)
   x_list = x.tolist()
   json.dump([[x_list[i][0], y] for (i, y) in enumerate(
-      y_pred.tolist())], open('graph.json', 'w'))
+      y_pred.tolist())], open('graph2.json', 'w'))
 
   # Plot the function, the prediction and the 95% confidence interval based on
   # the MSE
