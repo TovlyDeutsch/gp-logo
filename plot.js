@@ -31,16 +31,17 @@ var y = d3
   .domain([0, 35])
   .range([h, 0]);
 
-function lineGen(data) {
+function lineGen(xData, yData) {
+  console.log(xData);
   return _d =>
     d3.line().curve(d3.curveCardinal)(
-      data.map(function(pair) {
-        return [x(pair[0]), y(pair[1])];
+      Object.entries(xData).map(function([index, xValue]) {
+        return [x(xValue), y(yData[index])];
       })
     );
 }
 
-function plot(data) {
+function plot(xData, yData) {
   console.log("plotting");
 
   var pad = 50;
@@ -57,10 +58,6 @@ function plot(data) {
     .append("div")
     .classed("legend", true);
 
-  // function lineLookup(x) {
-  //   return
-  // }
-
   make_rules();
   chart_line();
   console.log("plotted line");
@@ -70,7 +67,7 @@ function plot(data) {
 
     g.append("svg:path")
       .attr("id", "path1")
-      .attr("d", lineGen(data));
+      .attr("d", lineGen(xData, yData));
   }
 
   function make_rules() {
@@ -93,23 +90,24 @@ function plot(data) {
 }
 
 async function main() {
-  let data1;
-  await loadJSON("graph0.json").then(response => {
-    // Parse JSON string into object
-    data1 = JSON.parse(response);
-    plot(data1);
+  let initialDataY;
+  XPromise = loadJSON("x.json");
+  initialYPromise = loadJSON("graph0.json");
+  let XData;
+  Promise.all([XPromise, initialYPromise]).then(function(values) {
+    XData = JSON.parse(values[0]);
+    initialDataY = JSON.parse(values[1]);
+    plot(XData, initialDataY);
   });
   let animationActive = true;
   let i = 1;
   while (animationActive) {
-    console.log("i");
     await loadJSON(`graph${i}.json`).then(response => {
-      console.log(` plotting graph${i}.json`);
-      let currentData = JSON.parse(response);
+      let currentYData = JSON.parse(response);
       d3.select("#path1")
         .transition()
         .duration(2000)
-        .attr("d", lineGen(currentData));
+        .attr("d", lineGen(XData, currentYData));
     });
     await new Promise(resolve => {
       setTimeout(resolve, 4000);

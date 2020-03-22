@@ -51,8 +51,8 @@ def plot(axs, filename):
   # Make the prediction on the meshed x-axis (ask for MSE as well)
   y_pred = gp.predict(x)
   x_list = x.tolist()
-  json.dump([[x_list[i][0], y] for (i, y) in enumerate(
-      y_pred.tolist())], open(filename, 'w'))
+  json.dump([x[0] for x in x_list], open('x.json', 'w'))
+  json.dump(y_pred.tolist(), open(filename, 'w'))
 
   # Plot the function, the prediction and the 95% confidence interval based on
   # the MSE
