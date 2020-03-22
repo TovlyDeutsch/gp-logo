@@ -122,9 +122,3 @@ async function main() {
 }
 
 main();
-
-// loadJSON(response => {
-//   // Parse JSON string into object
-//   let actual_JSON = JSON.parse(response);
-//   plot(actual_JSON);
-// });
