@@ -24,7 +24,7 @@ def v(x):
 
 
 def individual_T(x):
-  if (x[0] > -0.1 and x[0] < 0.1):
+  if (x[0] > -0.2 and x[0] < 0.2):
     return [0.]
   else:
     return [35.]
@@ -59,6 +59,9 @@ def plot(axs, filename, letter):
     return [random.uniform(a, b) for _ in range(num_values)]
   if letter == 'l':
     random_x_vals = sorted(range_ran(-10, 10, 100))
+  elif letter == 'T':
+    random_x_vals = sorted(range_ran(-10, 10, 100) +
+                           range_ran(-0.2, 0.2, 10))
   else:
     random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
                            range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
@@ -77,7 +80,7 @@ def plot(axs, filename, letter):
     noise_amount = 0.0
   elif letter == 'l':
     letter_fun = l_fun
-    noise_amount = 3.0
+    noise_amount = 20.0
   elif letter == 'o':
     letter_fun = o_fun
     noise_amount = 3.0
@@ -96,7 +99,7 @@ def plot(axs, filename, letter):
   kernel = C(1e-10, (1e-3, 1e3)) * RBF(10, (1e-2, 1e2))
   # kernel = Matern(1e-10)
   gp = GaussianProcessRegressor(kernel=kernel, alpha=dy ** 2,
-                                n_restarts_optimizer=10,
+                                n_restarts_optimizer=30,
                                 normalize_y=True)
 
   # Fit to data using Maximum Likelihood Estimation of the parameters

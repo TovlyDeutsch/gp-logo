@@ -25,26 +25,30 @@ function getXandY(letter, w, h) {
   let dxMax = 10;
   let dyMin = 0;
   let dyMax = 60;
+  let rangeYMax = h;
   if (letter === "T") {
     dyMin = 0;
     dyMax = 40;
+    rangeYMax = h - 15;
   } else if (letter === "o") {
     dxMin = -5;
     dxMax = 5;
-    dyMin = -11;
-    dyMax = 19;
+    dyMin = -15;
+    dyMax = 15;
   } else if (letter === "v") {
     dyMin = 0;
     dyMax = 40;
   }
   let x = d3
     .scaleLinear()
+    .clamp(true)
     .domain([dxMin, dxMax])
     .range([0, w]);
   let y = d3
     .scaleLinear()
+    .clamp(true)
     .domain([dyMin, dyMax])
-    .range([h, 0]);
+    .range([rangeYMax, 0]);
   return [x, y];
 }
 
@@ -92,6 +96,8 @@ function plot(xData, yData, letter, rotationAmount, polar, w, h) {
   if (letter == "l") {
     translateYAmount = -20;
     svg.attr("transform-origin", "top");
+  } else if (letter == "o") {
+    translateYAmount = 10;
   }
   // var vis = svg.append("svg:g");
   var vis = svg
