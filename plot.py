@@ -73,7 +73,7 @@ def gen_data_letter(letter, num_plots):
   for i in range(num_plots):
     if not os.path.exists('letter_data'):
       os.mkdir('letter_data')
-    plot(axs[i], f'letter_data/graph{i}.json', letter)
+    plot(axs[i], f'letter_data/graph_{letter}_{i}.json', letter)
   F = plt.gcf()
   Size = F.get_size_inches()
   F.set_size_inches(Size[0] * 0.4, Size[1] * 1.3, forward=True)

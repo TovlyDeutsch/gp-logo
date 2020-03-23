@@ -90,7 +90,7 @@ function plot(xData, yData) {
 async function main() {
   let initialDataY;
   XPromise = loadFloat32Array("x.bin");
-  initialYPromise = loadFloat32Array("graph0.bin");
+  initialYPromise = loadFloat32Array("graph_v_0.bin");
   let XData;
   Promise.all([XPromise, initialYPromise]).then(function(values) {
     XData = values[0];
@@ -100,7 +100,7 @@ async function main() {
   let animationActive = true;
   let i = 1;
   while (animationActive) {
-    await loadFloat32Array(`graph${i}.bin`).then(response => {
+    await loadFloat32Array(`graph_v_${i}.bin`).then(response => {
       let currentYData = response;
       d3.select("#path1")
         .transition()
