@@ -40,7 +40,7 @@ function lineGen(xData, yData) {
     );
 }
 
-function plot(xData, yData) {
+function plot(xData, yData, rotationAmount) {
   var pad = 50;
   var svg = d3
     .select("body")
@@ -48,7 +48,10 @@ function plot(xData, yData) {
     .attr("height", h + pad)
     .attr("width", w + pad);
 
-  var vis = svg.append("svg:g").attr("transform", "translate(40,20)");
+  svg.attr("transform", ` rotate(${rotationAmount})`);
+
+  var vis = svg.append("svg:g").attr("transform", `translate(40,20)`);
+  // vis.style("transfrom", `rotate(${rotationAmount}deg)`);
 
   chart_line();
 
@@ -61,7 +64,7 @@ function plot(xData, yData) {
   }
 }
 
-let activeLetter = "T";
+let activeLetter = "y";
 
 async function main() {
   let initialDataY;
@@ -71,7 +74,11 @@ async function main() {
   Promise.all([XPromise, initialYPromise]).then(function(values) {
     XData = values[0];
     initialDataY = values[1];
-    plot(XData, initialDataY);
+    let rotationAmount = 0;
+    if (activeLetter == "y") {
+      rotationAmount = 130;
+    }
+    plot(XData, initialDataY, rotationAmount);
   });
   let animationActive = true;
   // TODO consider random iteration rather than constant loop

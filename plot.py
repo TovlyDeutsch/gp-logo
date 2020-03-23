@@ -30,7 +30,15 @@ def individual_T(x):
     return [35.]
 
 
+def individual_y(x):
+  if (x[0] > -0.1 and x[0] < 0.1):
+    return [0.]
+  else:
+    return [35.]
+
+
 T = vectorize_letter(individual_T)
+y_fun = vectorize_letter(individual_y)
 # def T(x):
 #   test = np.apply_along_axis(individual_T, 1, x)
 #   return test
@@ -39,7 +47,7 @@ T = vectorize_letter(individual_T)
 def plot(axs, filename, letter):
   def range_ran(a, b, num_values=1):
     return [random.uniform(a, b) for _ in range(num_values)]
-  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) +
+  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
                          range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
 
   X = np.atleast_2d(random_x_vals).T
@@ -50,6 +58,9 @@ def plot(axs, filename, letter):
     noise_amount = 3.0
   elif letter == 'T':
     letter_fun = T
+    noise_amount = 0.0
+  elif letter == 'y':
+    letter_fun = y_fun
     noise_amount = 0.0
   else:
     raise NotImplementedError(f'letter {letter} not implemented')
