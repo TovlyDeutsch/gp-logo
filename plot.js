@@ -65,7 +65,7 @@ let activeLetter = "v";
 
 async function main() {
   let initialDataY;
-  XPromise = loadFloat32Array("x.bin");
+  XPromise = loadFloat32Array(`x_${activeLetter}.bin`);
   initialYPromise = loadFloat32Array(`graph_${activeLetter}_0.bin`);
   let XData;
   Promise.all([XPromise, initialYPromise]).then(function(values) {

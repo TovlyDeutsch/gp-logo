@@ -25,9 +25,8 @@ def plot(axs, filename, letter):
     return [random.uniform(a, b) for _ in range(num_values)]
   random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9,
                                                            10, 5) + range_ran(-2, 2, 100) + range_ran(-10, 10, 15))
-  # print(random_x_vals)
+
   X = np.atleast_2d(random_x_vals).T
-  # X = np.atleast_2d([float(x) for x in np.arange(-10, 10, 2.5)]).T
 
   # Observations
   if letter == 'v':
@@ -57,7 +56,8 @@ def plot(axs, filename, letter):
   # Make the prediction on the meshed x-axis (ask for MSE as well)
   y_pred = gp.predict(x)
   x_list = x.tolist()
-  json.dump([x[0] for x in x_list], open('./letter_data/x.json', 'w'))
+  json.dump([x[0] for x in x_list], open(
+      f'./letter_data/x_{letter}.json', 'w'))
   json.dump(y_pred.tolist(), open(filename, 'w'))
 
   # Plot the function, the prediction and the 95% confidence interval based on
@@ -80,7 +80,6 @@ def gen_data_letter(letter, num_plots):
 
 
 if __name__ == "__main__":
-  print(sys.argv)
   num_plots = int(sys.argv[2])
   word = sys.argv[1]
   for char in word:
