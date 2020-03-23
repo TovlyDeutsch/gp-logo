@@ -77,6 +77,7 @@ async function main() {
   // TODO consider random iteration rather than constant loop
   let i = 1;
   while (animationActive) {
+    // TODO consider loading (or having option to) all these files at once
     await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(response => {
       let currentYData = response;
       d3.select("#path1")
