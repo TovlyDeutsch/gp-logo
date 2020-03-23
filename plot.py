@@ -15,9 +15,23 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 
+# Functions to predict
 def v(x):
-  """The function to predict."""
   return 3 * abs(x)
+
+
+def individual_T(x):
+  # print(x[0])
+  if (x[0] > -0.1 and x[0] < 0.1):
+    return [0.]
+  else:
+    return [35.]
+
+
+def T(x):
+  test = np.apply_along_axis(individual_T, 1, x)
+  print(test)
+  return test
 
 
 def plot(axs, filename, letter):
@@ -31,6 +45,8 @@ def plot(axs, filename, letter):
   # Observations
   if letter == 'v':
     letter_fun = v
+  elif letter == 'T':
+    letter_fun = T
   else:
     raise NotImplementedError(f'letter {letter} not implemented')
   y = letter_fun(X).ravel()
@@ -80,7 +96,10 @@ def gen_data_letter(letter, num_plots):
 
 
 if __name__ == "__main__":
-  num_plots = int(sys.argv[2])
+  if len(sys.argv) < 3:
+    num_plots = 10
+  else:
+    num_plots = int(sys.argv[2])
   word = sys.argv[1]
   for char in word:
     gen_data_letter(char, num_plots)
