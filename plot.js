@@ -1,3 +1,4 @@
+// TODO configure this import
 // import * as d3 from "../node_modules/d3";
 
 const loadFloat32Array = fileName => {
@@ -40,8 +41,6 @@ function lineGen(xData, yData) {
 }
 
 function plot(xData, yData) {
-  console.log("plotting");
-
   var pad = 50;
   var svg = d3
     .select("body")
@@ -51,14 +50,7 @@ function plot(xData, yData) {
 
   var vis = svg.append("svg:g").attr("transform", "translate(40,20)");
 
-  var legend = d3
-    .select("body")
-    .append("div")
-    .classed("legend", true);
-
-  make_rules();
   chart_line();
-  console.log("plotted line");
 
   function chart_line() {
     var g = vis.append("svg:g").classed("series", true);
@@ -67,30 +59,14 @@ function plot(xData, yData) {
       .attr("id", "path1")
       .attr("d", lineGen(xData, yData));
   }
-
-  function make_rules() {
-    var rules = vis.append("svg:g").classed("rules", true);
-
-    function make_x_axis() {
-      return d3
-        .axisBottom()
-        .scale(x)
-        .ticks(10);
-    }
-
-    function make_y_axis() {
-      return d3
-        .axisLeft()
-        .scale(y)
-        .ticks(10);
-    }
-  }
 }
+
+let activeLetter = "v";
 
 async function main() {
   let initialDataY;
   XPromise = loadFloat32Array("x.bin");
-  initialYPromise = loadFloat32Array("graph_v_0.bin");
+  initialYPromise = loadFloat32Array(`graph_${activeLetter}_0.bin`);
   let XData;
   Promise.all([XPromise, initialYPromise]).then(function(values) {
     XData = values[0];
@@ -98,9 +74,10 @@ async function main() {
     plot(XData, initialDataY);
   });
   let animationActive = true;
+  // TODO consider random iteration rather than constant loop
   let i = 1;
   while (animationActive) {
-    await loadFloat32Array(`graph_v_${i}.bin`).then(response => {
+    await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(response => {
       let currentYData = response;
       d3.select("#path1")
         .transition()
