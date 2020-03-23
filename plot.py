@@ -16,7 +16,7 @@ from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 
 def vectorize_letter(individual_func):
-  return lambda x: np.apply_along_axis(individual_T, 1, x)
+  return lambda x: np.apply_along_axis(individual_func, 1, x)
 
 
 def v(x):
@@ -37,8 +37,13 @@ def individual_y(x):
     return [35.]
 
 
+def individual_l(x):
+  return [0.]
+
+
 T = vectorize_letter(individual_T)
 y_fun = vectorize_letter(individual_y)
+l_fun = vectorize_letter(individual_l)
 # def T(x):
 #   test = np.apply_along_axis(individual_T, 1, x)
 #   return test
@@ -47,8 +52,11 @@ y_fun = vectorize_letter(individual_y)
 def plot(axs, filename, letter):
   def range_ran(a, b, num_values=1):
     return [random.uniform(a, b) for _ in range(num_values)]
-  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
-                         range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
+  if letter == 'l':
+    random_x_vals = sorted(range_ran(-10, 10, 100))
+  else:
+    random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) +
+                           range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
 
   X = np.atleast_2d(random_x_vals).T
 
@@ -62,6 +70,9 @@ def plot(axs, filename, letter):
   elif letter == 'y':
     letter_fun = y_fun
     noise_amount = 0.0
+  elif letter == 'l':
+    letter_fun = l_fun
+    noise_amount = 3.0
   else:
     raise NotImplementedError(f'letter {letter} not implemented')
   y = letter_fun(X).ravel()
