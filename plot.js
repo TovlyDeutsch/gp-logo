@@ -28,7 +28,7 @@ var x = d3
   .range([0, w]);
 var y = d3
   .scaleLinear()
-  .domain([0, 35])
+  .domain([0, 45])
   .range([h, 0]);
 
 function lineGen(xData, yData) {
@@ -61,7 +61,7 @@ function plot(xData, yData) {
   }
 }
 
-let activeLetter = "v";
+let activeLetter = "T";
 
 async function main() {
   let initialDataY;
