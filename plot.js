@@ -28,19 +28,27 @@ var x = d3
   .range([0, w]);
 var y = d3
   .scaleLinear()
-  .domain([-10, 45])
+  .domain([-15, 45])
   .range([h, 0]);
 
-function lineGen(xData, yData) {
+function lineGen(xData, yData, polar = false) {
   return _d =>
     d3.line().curve(d3.curveCardinal)(
       Object.entries(xData).map(function([index, xValue]) {
-        return [x(xValue), y(yData[index])];
+        if (polar) {
+          let theta = (2 * Math.PI) / xData.length;
+          return [
+            x((5 + yData[index]) * Math.cos(index * theta)),
+            y((15 + yData[index] * 3) * Math.sin(index * theta))
+          ];
+        } else {
+          return [x(xValue), y(yData[index])];
+        }
       })
     );
 }
 
-function plot(xData, yData, rotationAmount) {
+function plot(xData, yData, rotationAmount, polar) {
   var pad = 50;
   var svg = d3
     .select("body")
@@ -60,47 +68,50 @@ function plot(xData, yData, rotationAmount) {
 
     g.append("svg:path")
       .attr("id", "path1")
-      .attr("d", lineGen(xData, yData));
+      .attr("d", lineGen(xData, yData, polar));
   }
 }
 
-let activeLetter = "l";
+let activeLetter = "o";
 
 async function main() {
   let initialDataY;
   XPromise = loadFloat32Array(`x_${activeLetter}.bin`);
   initialYPromise = loadFloat32Array(`graph_${activeLetter}_0.bin`);
   let XData;
-  Promise.all([XPromise, initialYPromise]).then(function(values) {
+  let polar = activeLetter === "o";
+  Promise.all([XPromise, initialYPromise]).then(async function(values) {
     XData = values[0];
     initialDataY = values[1];
     let rotationAmount = 0;
     if (activeLetter == "y") {
       rotationAmount = 130;
     }
-    plot(XData, initialDataY, rotationAmount);
-  });
-  let animationActive = true;
-  // TODO consider random iteration rather than constant loop
-  let i = 1;
-  while (animationActive) {
-    // TODO consider loading (or having option to) all these files at once
-    await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(response => {
-      let currentYData = response;
-      d3.select("#path1")
-        .transition()
-        .duration(2000)
-        .attr("d", lineGen(XData, currentYData));
-    });
-    await new Promise(resolve => {
-      setTimeout(resolve, 4000);
-    });
-    if (i < 9) {
-      i++;
-    } else {
-      i = 0;
+    plot(XData, initialDataY, rotationAmount, polar);
+    let animationActive = true;
+    // TODO consider random iteration rather than constant loop
+    let i = 1;
+    while (animationActive) {
+      // TODO consider loading (or having option to) all these files at once
+      await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(
+        response => {
+          let currentYData = response;
+          d3.select("#path1")
+            .transition()
+            .duration(2000)
+            .attr("d", lineGen(XData, currentYData, polar));
+        }
+      );
+      await new Promise(resolve => {
+        setTimeout(resolve, 4000);
+      });
+      if (i < 9) {
+        i++;
+      } else {
+        i = 0;
+      }
     }
-  }
+  });
 }
 
 main();

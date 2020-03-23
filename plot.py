@@ -41,9 +41,14 @@ def individual_l(x):
   return [0.]
 
 
+def individual_o(x):
+  return [0.]
+
+
 T = vectorize_letter(individual_T)
 y_fun = vectorize_letter(individual_y)
 l_fun = vectorize_letter(individual_l)
+o_fun = vectorize_letter(individual_o)
 # def T(x):
 #   test = np.apply_along_axis(individual_T, 1, x)
 #   return test
@@ -55,7 +60,7 @@ def plot(axs, filename, letter):
   if letter == 'l':
     random_x_vals = sorted(range_ran(-10, 10, 100))
   else:
-    random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) +
+    random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
                            range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
 
   X = np.atleast_2d(random_x_vals).T
@@ -72,6 +77,9 @@ def plot(axs, filename, letter):
     noise_amount = 0.0
   elif letter == 'l':
     letter_fun = l_fun
+    noise_amount = 3.0
+  elif letter == 'o':
+    letter_fun = o_fun
     noise_amount = 3.0
   else:
     raise NotImplementedError(f'letter {letter} not implemented')
