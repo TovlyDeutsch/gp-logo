@@ -8,6 +8,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 import random
 import json
+import sys
+import os
 
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
@@ -18,7 +20,7 @@ def v(x):
   return 3 * abs(x)
 
 
-def plot(axs, filename):
+def plot(axs, filename, letter):
   def range_ran(a, b, num_values=1):
     return [random.uniform(a, b) for _ in range(num_values)]
   random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9,
@@ -28,7 +30,11 @@ def plot(axs, filename):
   # X = np.atleast_2d([float(x) for x in np.arange(-10, 10, 2.5)]).T
 
   # Observations
-  y = v(X).ravel()
+  if letter == 'v':
+    letter_fun = v
+  else:
+    raise NotImplementedError(f'letter {letter} not implemented')
+  y = letter_fun(X).ravel()
   noise_amount = 3.0
   dy = 0.5 + noise_amount * np.random.random(y.shape)
   noise = np.random.normal(0, dy)
@@ -56,24 +62,27 @@ def plot(axs, filename):
 
   # Plot the function, the prediction and the 95% confidence interval based on
   # the MSE
-  # axs.figure()
   axs.plot(x, v(x), 'r:', label=r'$f(x) = x\,\sin(x)$')
   axs.plot(X, y, 'r.', markersize=10, label='Observations')
   axs.plot(x, y_pred, 'b-', label='Prediction')
-  # axs.xlabel('$x$')
-  # axs.ylabel('$f(x)$')
-  # axs.ylim(-10, 20)
-  # axs.legend(loc='upper left')
-  # plt.show()
 
 
-if __name__ == "__main__":
-  num_plots = 10
+def gen_data_letter(letter, num_plots):
   fig, axs = plt.subplots(num_plots)
-  fig.suptitle('Vertically stacked subplots')
+  # fig.suptitle('Vertically stacked subplots')
   for i in range(num_plots):
-    plot(axs[i], f'graph{i}.json')
+    if not os.path.exists('letter_data'):
+      os.mkdir('letter_data')
+    plot(axs[i], f'letter_data/graph{i}.json', letter)
   F = plt.gcf()
   Size = F.get_size_inches()
   F.set_size_inches(Size[0] * 0.4, Size[1] * 1.3, forward=True)
-  # plt.show()
+
+
+if __name__ == "__main__":
+  print(sys.argv)
+  num_plots = int(sys.argv[2])
+  word = sys.argv[1]
+  for char in word:
+    gen_data_letter(char, num_plots)
+  os.system('node compress.js')

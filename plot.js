@@ -1,20 +1,19 @@
 // import * as d3 from "../node_modules/d3";
-console.log("test");
-console.log(d3);
 
-const loadJSON = fileName => {
+const loadFloat32Array = fileName => {
   // TODO considering locally caching instead of fresh requests
   return new Promise(resolve => {
     let xobj = new XMLHttpRequest();
-    xobj.overrideMimeType("application/json");
-    xobj.open("GET", fileName, true);
+    xobj.responseType = "arraybuffer";
+    xobj.open("GET", `./letter_data/${fileName}`, true);
     // Replace 'my_data' with the path to your file
     xobj.onreadystatechange = () => {
       if (xobj.readyState === 4 && xobj.status === 200) {
         // Required use of an anonymous callback
         // as .open() will NOT return a value but simply returns undefined in asynchronous mode
-        resolve(xobj.responseText);
+        resolve(new Float32Array(xobj.response));
       }
+      // TODO consider request failure
     };
     xobj.send(null);
   });
@@ -32,7 +31,6 @@ var y = d3
   .range([h, 0]);
 
 function lineGen(xData, yData) {
-  console.log(xData);
   return _d =>
     d3.line().curve(d3.curveCardinal)(
       Object.entries(xData).map(function([index, xValue]) {
@@ -91,19 +89,19 @@ function plot(xData, yData) {
 
 async function main() {
   let initialDataY;
-  XPromise = loadJSON("x.json");
-  initialYPromise = loadJSON("graph0.json");
+  XPromise = loadFloat32Array("x.bin");
+  initialYPromise = loadFloat32Array("graph0.bin");
   let XData;
   Promise.all([XPromise, initialYPromise]).then(function(values) {
-    XData = JSON.parse(values[0]);
-    initialDataY = JSON.parse(values[1]);
+    XData = values[0];
+    initialDataY = values[1];
     plot(XData, initialDataY);
   });
   let animationActive = true;
   let i = 1;
   while (animationActive) {
-    await loadJSON(`graph${i}.json`).then(response => {
-      let currentYData = JSON.parse(response);
+    await loadFloat32Array(`graph${i}.bin`).then(response => {
+      let currentYData = response;
       d3.select("#path1")
         .transition()
         .duration(2000)
