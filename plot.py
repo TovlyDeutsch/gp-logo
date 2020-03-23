@@ -21,7 +21,6 @@ def v(x):
 
 
 def individual_T(x):
-  # print(x[0])
   if (x[0] > -0.1 and x[0] < 0.1):
     return [0.]
   else:
@@ -30,27 +29,27 @@ def individual_T(x):
 
 def T(x):
   test = np.apply_along_axis(individual_T, 1, x)
-  print(test)
   return test
 
 
 def plot(axs, filename, letter):
   def range_ran(a, b, num_values=1):
     return [random.uniform(a, b) for _ in range(num_values)]
-  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9,
-                                                           10, 5) + range_ran(-2, 2, 100) + range_ran(-10, 10, 15))
+  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
+                         range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
 
   X = np.atleast_2d(random_x_vals).T
 
   # Observations
   if letter == 'v':
     letter_fun = v
+    noise_amount = 3.0
   elif letter == 'T':
     letter_fun = T
+    noise_amount = 0.0
   else:
     raise NotImplementedError(f'letter {letter} not implemented')
   y = letter_fun(X).ravel()
-  noise_amount = 3.0
   dy = 0.5 + noise_amount * np.random.random(y.shape)
   noise = np.random.normal(0, dy)
   y += noise
