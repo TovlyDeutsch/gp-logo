@@ -37,3 +37,7 @@ body {
   stroke: black;
   stroke-width: 3px;
 }
+
+path {
+  stroke-linecap: round;
+}

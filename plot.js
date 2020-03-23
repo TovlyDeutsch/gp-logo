@@ -36,7 +36,7 @@ function lineGen(xData, yData, polar = false) {
     d3.line().curve(d3.curveCardinal)(
       Object.entries(xData).map(function([index, xValue]) {
         if (polar) {
-          let theta = (2 * Math.PI) / xData.length;
+          let theta = (2 * Math.PI) / (xData.length - 1);
           return [
             x((5 + yData[index]) * Math.cos(index * theta)),
             y((15 + yData[index] * 3) * Math.sin(index * theta))
