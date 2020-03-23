@@ -7,9 +7,10 @@ fs.readdir("./letter_data", (err, files) => {
       let parsedData = JSON.parse(rawData);
       let fl32Array = Float32Array.from(parsedData);
       let [fileNameAlone, extension] = fileName.split(".");
-      fs.open(`./letter_data/${fileNameAlone}.bin`, "wx", (e, fd) => {
+      fs.open(`./letter_data/${fileNameAlone}.bin`, "w", (e, fd) => {
         if (fd) {
           fs.writeSync(fd, fl32Array);
+          fs.unlink(`./letter_data/${fileName}`, err => {});
         }
       });
     }
