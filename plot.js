@@ -20,15 +20,20 @@ const loadFloat32Array = fileName => {
   });
 };
 
-var w = 200;
-var h = 200;
-
-function getXandY(letter) {
+function getXandY(letter, w, h) {
   let dxMin = -10;
   let dxMax = 10;
-  let dyMin = -15;
-  let dyMax = 45;
+  let dyMin = 0;
+  let dyMax = 60;
   if (letter === "T") {
+    dyMin = 0;
+    dyMax = 40;
+  } else if (letter === "o") {
+    dxMin = -5;
+    dxMax = 5;
+    dyMin = -11;
+    dyMax = 19;
+  } else if (letter === "v") {
     dyMin = 0;
     dyMax = 40;
   }
@@ -43,16 +48,17 @@ function getXandY(letter) {
   return [x, y];
 }
 
-function lineGen(xData, yData, letter, polar = false) {
-  let [x, y] = getXandY(letter);
+function lineGen(xData, yData, letter, polar, w, h) {
+  let [x, y] = getXandY(letter, w, h);
   return _d =>
     d3.line().curve(d3.curveCardinal)(
       Object.entries(xData).map(function([index, xValue]) {
         if (polar) {
           let theta = (2 * Math.PI) / (xData.length - 1);
+          let r = 4;
           return [
-            x((3 + yData[index]) * Math.cos(index * theta)),
-            y(12 + (9 + yData[index] * 3) * Math.sin(index * theta))
+            x((r + yData[index]) * Math.cos(index * theta)),
+            y(3 * (r + yData[index]) * Math.sin(index * theta))
           ];
         } else {
           return [x(xValue), y(yData[index])];
@@ -61,7 +67,7 @@ function lineGen(xData, yData, letter, polar = false) {
     );
 }
 
-function plot(xData, yData, letter, rotationAmount, polar) {
+function plot(xData, yData, letter, rotationAmount, polar, w, h) {
   var pad = 10;
   var svg = d3
     .select("body")
@@ -69,10 +75,31 @@ function plot(xData, yData, letter, rotationAmount, polar) {
     .attr("height", h + pad)
     .attr("width", w + pad);
 
-  svg.attr("transform", ` rotate(${rotationAmount})`);
+  let svgTranslateX = 0;
+  let svgTranslateY = 0;
+  if (letter == "y") {
+    svgTranslateX = -90;
+    svgTranslateY = 35;
+  }
 
+  svg.attr(
+    "transform",
+    `translate(${svgTranslateX}, ${svgTranslateY}) rotate(${rotationAmount})`
+  );
+
+  let translateYAmount = 0;
+  let translateXAmount = 5;
+  if (letter == "l") {
+    translateYAmount = -20;
+    svg.attr("transform-origin", "top");
+  }
   // var vis = svg.append("svg:g");
-  var vis = svg.append("svg:g").attr("transform", `translate(5, 0)`);
+  var vis = svg
+    .append("svg:g")
+    .attr("transform", `translate(${translateXAmount}, ${translateYAmount})`);
+  // if (letter == "l") {
+  //   svg.attr("transform-origin", "top");
+  // }
   // vis.style("transfrom", `rotate(${rotationAmount}deg)`);
 
   chart_line();
@@ -82,7 +109,7 @@ function plot(xData, yData, letter, rotationAmount, polar) {
 
     g.append("svg:path")
       .attr("id", `path_${letter}`)
-      .attr("d", lineGen(xData, yData, letter, polar));
+      .attr("d", lineGen(xData, yData, letter, polar, w, h));
   }
 }
 
@@ -98,10 +125,18 @@ async function plotAndAnimateLetter(activeLetter) {
     XData = values[0];
     initialDataY = values[1];
     let rotationAmount = 0;
+    let w = 100;
+    let h = 100;
     if (activeLetter == "y") {
       rotationAmount = 130;
+    } else if (activeLetter == "l") {
+      rotationAmount = 90;
+      h = 50;
+    } else if (activeLetter == "T") {
+      w = 200;
+      h = 200;
     }
-    plot(XData, initialDataY, activeLetter, rotationAmount, polar);
+    plot(XData, initialDataY, activeLetter, rotationAmount, polar, w, h);
     let animationActive = true;
     // TODO consider random iteration rather than constant loop
     let i = 1;
@@ -113,7 +148,7 @@ async function plotAndAnimateLetter(activeLetter) {
           d3.select(`#path_${activeLetter}`)
             .transition()
             .duration(2000)
-            .attr("d", lineGen(XData, currentYData, activeLetter, polar));
+            .attr("d", lineGen(XData, currentYData, activeLetter, polar, w, h));
         }
       );
       await new Promise(resolve => {
@@ -130,3 +165,6 @@ async function plotAndAnimateLetter(activeLetter) {
 
 plotAndAnimateLetter("T");
 plotAndAnimateLetter("o");
+plotAndAnimateLetter("v");
+plotAndAnimateLetter("l");
+plotAndAnimateLetter("y");
