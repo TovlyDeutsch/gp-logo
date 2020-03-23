@@ -15,7 +15,10 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 
-# Functions to predict
+def vectorize_letter(individual_func):
+  return lambda x: np.apply_along_axis(individual_T, 1, x)
+
+
 def v(x):
   return 3 * abs(x)
 
@@ -27,15 +30,16 @@ def individual_T(x):
     return [35.]
 
 
-def T(x):
-  test = np.apply_along_axis(individual_T, 1, x)
-  return test
+T = vectorize_letter(individual_T)
+# def T(x):
+#   test = np.apply_along_axis(individual_T, 1, x)
+#   return test
 
 
 def plot(axs, filename, letter):
   def range_ran(a, b, num_values=1):
     return [random.uniform(a, b) for _ in range(num_values)]
-  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) + \
+  random_x_vals = sorted(range_ran(-10, -9, 5) + range_ran(9, 10, 5) +
                          range_ran(-2, 2, 100) + range_ran(-0.1, 0.1, 10) + range_ran(-10, 10, 15))
 
   X = np.atleast_2d(random_x_vals).T
