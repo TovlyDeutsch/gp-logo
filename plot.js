@@ -20,26 +20,39 @@ const loadFloat32Array = fileName => {
   });
 };
 
-var w = 400;
-var h = 400;
-var x = d3
-  .scaleLinear()
-  .domain([-10, 10])
-  .range([0, w]);
-var y = d3
-  .scaleLinear()
-  .domain([-15, 45])
-  .range([h, 0]);
+var w = 200;
+var h = 200;
 
-function lineGen(xData, yData, polar = false) {
+function getXandY(letter) {
+  let dxMin = -10;
+  let dxMax = 10;
+  let dyMin = -15;
+  let dyMax = 45;
+  if (letter === "T") {
+    dyMin = 0;
+    dyMax = 40;
+  }
+  let x = d3
+    .scaleLinear()
+    .domain([dxMin, dxMax])
+    .range([0, w]);
+  let y = d3
+    .scaleLinear()
+    .domain([dyMin, dyMax])
+    .range([h, 0]);
+  return [x, y];
+}
+
+function lineGen(xData, yData, letter, polar = false) {
+  let [x, y] = getXandY(letter);
   return _d =>
     d3.line().curve(d3.curveCardinal)(
       Object.entries(xData).map(function([index, xValue]) {
         if (polar) {
           let theta = (2 * Math.PI) / (xData.length - 1);
           return [
-            x((5 + yData[index]) * Math.cos(index * theta)),
-            y((15 + yData[index] * 3) * Math.sin(index * theta))
+            x((3 + yData[index]) * Math.cos(index * theta)),
+            y(12 + (9 + yData[index] * 3) * Math.sin(index * theta))
           ];
         } else {
           return [x(xValue), y(yData[index])];
@@ -48,8 +61,8 @@ function lineGen(xData, yData, polar = false) {
     );
 }
 
-function plot(xData, yData, rotationAmount, polar) {
-  var pad = 50;
+function plot(xData, yData, letter, rotationAmount, polar) {
+  var pad = 10;
   var svg = d3
     .select("body")
     .append("svg:svg")
@@ -58,7 +71,8 @@ function plot(xData, yData, rotationAmount, polar) {
 
   svg.attr("transform", ` rotate(${rotationAmount})`);
 
-  var vis = svg.append("svg:g").attr("transform", `translate(40,20)`);
+  // var vis = svg.append("svg:g");
+  var vis = svg.append("svg:g").attr("transform", `translate(5, 0)`);
   // vis.style("transfrom", `rotate(${rotationAmount}deg)`);
 
   chart_line();
@@ -67,14 +81,14 @@ function plot(xData, yData, rotationAmount, polar) {
     var g = vis.append("svg:g").classed("series", true);
 
     g.append("svg:path")
-      .attr("id", "path1")
-      .attr("d", lineGen(xData, yData, polar));
+      .attr("id", `path_${letter}`)
+      .attr("d", lineGen(xData, yData, letter, polar));
   }
 }
 
-let activeLetter = "o";
+// let activeLetter = "T";
 
-async function main() {
+async function plotAndAnimateLetter(activeLetter) {
   let initialDataY;
   XPromise = loadFloat32Array(`x_${activeLetter}.bin`);
   initialYPromise = loadFloat32Array(`graph_${activeLetter}_0.bin`);
@@ -87,7 +101,7 @@ async function main() {
     if (activeLetter == "y") {
       rotationAmount = 130;
     }
-    plot(XData, initialDataY, rotationAmount, polar);
+    plot(XData, initialDataY, activeLetter, rotationAmount, polar);
     let animationActive = true;
     // TODO consider random iteration rather than constant loop
     let i = 1;
@@ -96,10 +110,10 @@ async function main() {
       await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(
         response => {
           let currentYData = response;
-          d3.select("#path1")
+          d3.select(`#path_${activeLetter}`)
             .transition()
             .duration(2000)
-            .attr("d", lineGen(XData, currentYData, polar));
+            .attr("d", lineGen(XData, currentYData, activeLetter, polar));
         }
       );
       await new Promise(resolve => {
@@ -114,4 +128,5 @@ async function main() {
   });
 }
 
-main();
+plotAndAnimateLetter("T");
+plotAndAnimateLetter("o");
