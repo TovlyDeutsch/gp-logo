@@ -20,6 +20,8 @@ const loadFloat32Array = fileName => {
   });
 };
 
+let scaleFactor = 1.0;
+
 function getXandY(letter, w, h) {
   let dxMin = -10;
   let dxMax = 10;
@@ -71,20 +73,25 @@ function lineGen(xData, yData, letter, polar, w, h) {
     );
 }
 
-function plot(xData, yData, letter, rotationAmount, polar, w, h) {
+function initialPlotLetter(xData, yData, letter, rotationAmount, polar, w, h) {
   var pad = 10;
   var svg = d3
-    .select("body")
+    .select("#logo")
     .append("svg:svg")
     .attr("height", h + pad)
-    .attr("width", w + pad);
+    .attr("width", w + pad)
+    .attr("viewbox", `0 0 ${w + pad} ${h + pad}`);
 
   let svgTranslateX = 0;
   let svgTranslateY = 0;
   if (letter == "y") {
     svgTranslateX = -90;
     svgTranslateY = 35;
+  } else if (letter == "T") {
+    svgTranslateX = 50;
   }
+  svgTranslateX *= scaleFactor;
+  svgTranslateY *= scaleFactor;
 
   svg.attr(
     "transform",
@@ -99,14 +106,12 @@ function plot(xData, yData, letter, rotationAmount, polar, w, h) {
   } else if (letter == "o") {
     translateYAmount = 10;
   }
-  // var vis = svg.append("svg:g");
+  translateXAmount *= scaleFactor;
+  translateYAmount *= scaleFactor;
+
   var vis = svg
     .append("svg:g")
     .attr("transform", `translate(${translateXAmount}, ${translateYAmount})`);
-  // if (letter == "l") {
-  //   svg.attr("transform-origin", "top");
-  // }
-  // vis.style("transfrom", `rotate(${rotationAmount}deg)`);
 
   chart_line();
 
@@ -119,58 +124,84 @@ function plot(xData, yData, letter, rotationAmount, polar, w, h) {
   }
 }
 
-// let activeLetter = "T";
+let XDataCache = {};
 
-async function plotAndAnimateLetter(activeLetter) {
-  let initialDataY;
-  XPromise = loadFloat32Array(`x_${activeLetter}.bin`);
-  initialYPromise = loadFloat32Array(`graph_${activeLetter}_0.bin`);
-  let XData;
-  let polar = activeLetter === "o";
-  Promise.all([XPromise, initialYPromise]).then(async function(values) {
-    XData = values[0];
-    initialDataY = values[1];
-    let rotationAmount = 0;
-    let w = 100;
-    let h = 100;
-    if (activeLetter == "y") {
-      rotationAmount = 130;
-    } else if (activeLetter == "l") {
-      rotationAmount = 90;
-      h = 50;
-    } else if (activeLetter == "T") {
-      w = 200;
-      h = 200;
-    }
-    plot(XData, initialDataY, activeLetter, rotationAmount, polar, w, h);
-    let animationActive = true;
-    // TODO consider random iteration rather than constant loop
-    let i = 1;
-    while (animationActive) {
-      // TODO consider loading (or having option to) all these files at once
-      await loadFloat32Array(`graph_${activeLetter}_${i}.bin`).then(
-        response => {
-          let currentYData = response;
-          d3.select(`#path_${activeLetter}`)
-            .transition()
-            .duration(2000)
-            .attr("d", lineGen(XData, currentYData, activeLetter, polar, w, h));
-        }
-      );
-      await new Promise(resolve => {
-        setTimeout(resolve, 4000);
-      });
-      if (i < 9) {
+// api request letter get promise that resolves when letter is ready to render
+function getLetterPromises(letter, i) {
+  if (!XDataCache.hasOwnProperty(letter)) {
+    XPromise = loadFloat32Array(`x_${letter}.bin`);
+  } else {
+    XPromise = new Promise(resolve => resolve(XDataCache[letter]));
+  }
+  YPromise = loadFloat32Array(`graph_${letter}_${i}.bin`);
+  return [XPromise, YPromise];
+}
+
+function getWordPromises(word, i) {
+  promises = [];
+  for (let char of word) {
+    promises = promises.concat(getLetterPromises(char, i));
+  }
+  return promises;
+}
+
+async function animateWord(word) {
+  let numStates = 10;
+  let delayBetweenAnimations = 4000;
+  let animationActive = true;
+  let initialRender = true;
+  // TODO consider random iteration rather than constant loop
+  let i = 0;
+  while (animationActive) {
+    let promises = getWordPromises(word, i);
+    await Promise.all(promises).then(async function(values) {
+      for (let [letterIndex, letter] of Object.entries(word)) {
+        XData = values[letterIndex * 2];
+        YData = values[letterIndex * 2 + 1];
+        plotLetter(letter, XData, YData, initialRender);
+      }
+      initialRender = false;
+      if (i < numStates - 1) {
         i++;
       } else {
         i = 0;
       }
-    }
-  });
+    });
+    await new Promise(resolve => {
+      setTimeout(resolve, delayBetweenAnimations);
+    });
+  }
 }
 
-plotAndAnimateLetter("T");
-plotAndAnimateLetter("o");
-plotAndAnimateLetter("v");
-plotAndAnimateLetter("l");
-plotAndAnimateLetter("y");
+function plotLetter(letter, XData, YData, initialRender) {
+  let [rotationAmount, w, h] = getRWH(letter);
+  let polar = letter === "o";
+  if (initialRender) {
+    initialPlotLetter(XData, YData, letter, rotationAmount, polar, w, h);
+  } else {
+    d3.select(`#path_${letter}`)
+      .transition()
+      .duration(2000)
+      .attr("d", lineGen(XData, YData, letter, polar, w, h));
+  }
+}
+
+function getRWH(letter) {
+  let w = 100;
+  let h = 100;
+  let rotationAmount = 0;
+  if (letter == "y") {
+    rotationAmount = 130;
+  } else if (letter == "l") {
+    rotationAmount = 90;
+    h = 50;
+  } else if (letter == "T") {
+    w = 200;
+    h = 200;
+  }
+  w = w * scaleFactor;
+  h = h * scaleFactor;
+  return [rotationAmount, w, h];
+}
+
+animateWord("Tovly");
